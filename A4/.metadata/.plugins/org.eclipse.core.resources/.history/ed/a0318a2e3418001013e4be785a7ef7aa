@@ -1,0 +1,177 @@
+package A4;
+import java.io.*;
+import java.util.*;
+import java.lang.Math; //for floor function
+
+class Employee {
+    int id;
+    double salary;
+
+    public Employee(int id, double salary) {
+        this.id = id;
+        this.salary = salary;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee ID: " + id + ", Salary: " + salary;
+    }
+}
+
+public class EmployeeRange {
+
+    public static void main(String[] args) {
+        // Input K
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the number of salary brackets (k): ");
+        int k = scanner.nextInt();
+
+        // Array of ArrayLists to store employees for each salary bracket
+        List<Employee>[] salaryBrackets = new ArrayList[k];
+        for (int i = 0; i < k; i++) {
+            salaryBrackets[i] = new ArrayList<>();
+        }
+
+        // HashMap to check for duplicate employee IDs quickly.
+        Map<Integer, Employee> employeeMap = new HashMap<>();
+
+        double minSalary = 0;
+        double maxSalary = 0;
+        String fileName = "Employees.txt";
+        
+        //read maximum and minimum salaries
+        //
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
+            // Read the first two lines
+            String line = br.readLine();
+            if (line != null) {
+                minSalary = Double.parseDouble(line.trim()); //read first line with minimum
+            }
+            line = br.readLine();
+            if (line != null) {
+                maxSalary = Double.parseDouble(line.trim()); //read second line with maximum
+            }
+
+            // Calculate the range of salaries for each bracket
+            double bracketRange = (maxSalary - minSalary) / k;
+
+            // Read the employee records from the file.
+            while ((line = br.readLine()) != null) {
+                // Each line should be "EmployeeID Salary"
+                String[] parts = line.trim().split("\\s+");
+                if (parts.length < 2) {
+                    continue;
+                }
+                int empId = Integer.parseInt(parts[0]);
+                double salary = Double.parseDouble(parts[1]);
+
+                // Check for duplicates using the HashMap
+                //skip duplicates
+                if (employeeMap.containsKey(empId)) {
+                    System.out.println("Duplicate employee found in file with ID: " + empId + ". Skipping.");
+                    continue; //exit current loop iteration
+                }
+
+                // Create an employee object from information read in the file
+                Employee employee = new Employee(empId, salary);
+
+                // Determine the appropriate bracket.
+                // also consider values that may be below the minimum or above the maximum
+                
+                // Calculate bracket index 
+                int bracketIndex = (int) Math.floor((salary - minSalary) / bracketRange);
+
+                // If salary is below minSalary, push it to the first bracket
+                if (bracketIndex < 0) {
+                    bracketIndex = 0;
+                }
+                // If salary is above maxSalary, push it to the last bracket
+                if (bracketIndex >= k) {
+                    bracketIndex = k - 1;
+                }
+
+                // Insert the employee into the corresponding bracket
+                salaryBrackets[bracketIndex].add(employee);
+                // Add to the hash table
+                employeeMap.put(empId, employee);
+            }
+
+            System.out.println("Employees have been distributed into salary brackets.");
+
+            //to print the range brackets
+            for (int i = 0; i < k; i++) {
+                System.out.println("Bracket " + i + " (" +
+                        (minSalary + i * bracketRange) + " to " +
+                        (minSalary + (i + 1) * bracketRange) + "): " +
+                        salaryBrackets[i].size() + " employees.");
+            }
+
+            // Code for test cases
+            // Follows the same code as above, but for input instead of reading from a file
+            scanner.nextLine();
+            while (true) {
+                System.out.print("Do you want to add a new employee? (y/n): ");
+                String answer = scanner.nextLine().trim().toLowerCase();
+                if (!answer.equals("y")) {
+                    break;
+                }
+                try {
+                    System.out.print("Enter employee ID: ");
+                    int newId = Integer.parseInt(scanner.nextLine().trim());
+                    System.out.print("Enter employee salary: ");
+                    double newSalary = Double.parseDouble(scanner.nextLine().trim());
+
+                    // Check for duplicates
+                    if (employeeMap.containsKey(newId)) {
+                        System.out.println("Employee with ID " + newId + " already exists.");
+                    } else {
+                        // Create new employee and add to the corresponding bracket
+                        Employee newEmployee = new Employee(newId, newSalary);
+                        int bracketIndex = (int) Math.floor((newSalary - minSalary) / bracketRange);
+                        
+                        // If salary is below minSalary, push it to the first bracket
+                        if (bracketIndex < 0) {
+                            bracketIndex = 0;
+                        }
+                        // If salary is above maxSalary, add it to the last bracket
+                        if (bracketIndex >= k) {
+                            bracketIndex = k - 1;
+                        }
+
+                        salaryBrackets[bracketIndex].add(newEmployee);
+                        employeeMap.put(newId, newEmployee);
+                        System.out.println("Employee added successfully to bracket " + bracketIndex + ".");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid input. Please try again.");
+                }
+            } // end of while loop
+        
+        
+        } catch (FileNotFoundException e) {
+            System.out.println("Employees.txt file not found. Please ensure it exists in the working directory.");
+        } catch (IOException e) {
+            System.out.println("Error reading from file: " + e.getMessage());
+        }
+            
+        //now search for employee using the hashmap created
+        while (true) {
+        	System.out.println("Do you want to search for an Employee's salary? (y/n): ");
+        	String answer = scanner.nextLine();
+        	if (!answer.equals("y")) {
+            break;
+        	}
+        	System.out.println("Enter Employee's ID:");
+        	Integer empId = Integer.parseInt(scanner.nextLine());
+        	Employee retrievedEmployee = employeeMap.get(empId);
+        	if (retrievedEmployee != null) {
+            System.out.println("Employee Salary: " + retrievedEmployee.salary);
+        	} else {
+            System.out.println("Employee with ID " + empId + " not found.");
+        	}
+        
+        }
+    
+        scanner.close();
+    }
+}
