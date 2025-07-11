@@ -6,7 +6,7 @@ import java.io.*;
 public class Q2 {
     public static void main(String[] args) {
         
-        int N = 6;
+        int N = 8;
         int M = 2; 
 
         // Initialize array with predefined values
