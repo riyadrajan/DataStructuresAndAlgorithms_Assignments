@@ -28,7 +28,7 @@ This repository contains three out of four assignments completed as part of COEN
     - Sorting array of custom Time objects
     - Checking for uniqueness using comparisons
 
-## A3 (Not Included)
+## A3  
 ### Topics Covered
 - Sorting Algorithms
     - 3-way quicksort (entropy-optimal sort)
